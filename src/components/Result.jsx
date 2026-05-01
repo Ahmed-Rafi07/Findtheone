@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { trackResultToSheet } from '../utils/googleSheets';
 
 const verdicts = [
@@ -30,6 +30,7 @@ export default function Result({ result, score, quizScore, taskScore, onReset, q
   const verdict = pickVerdict(percent);
   const isHigh = percent >= 85;
   const isLow = percent < 40;
+  const sentToSheetRef = useRef(false);
 
   const shareText = `${userNames.yourName || 'Me'} & ${userNames.crushName || 'They'}: ${percent}% Match - ${verdict.title}`;
 
@@ -65,15 +66,19 @@ export default function Result({ result, score, quizScore, taskScore, onReset, q
     }
   }, [percent, result.message, userNames, isSpecialMatch]);
 
-  // Track result to Google Sheets (silent, non-blocking)
   useEffect(() => {
+    if (sentToSheetRef.current) {
+      return;
+    }
+
+    sentToSheetRef.current = true;
     trackResultToSheet({
       userName: userNames.yourName,
       crushName: userNames.crushName,
       score: percent,
       message: result.message,
     });
-  }, [percent, userNames]);
+  }, [percent, result.message, userNames.crushName, userNames.yourName]);
 
   return (
     <section className={`panel stage-panel result-stage ${isHigh ? 'result-high' : ''} ${isLow ? 'result-low' : ''}`}>
@@ -83,14 +88,14 @@ export default function Result({ result, score, quizScore, taskScore, onReset, q
       {userNames.yourName && userNames.crushName && (
         <div className="result-names" style={{ textAlign: 'center', marginBottom: '12px', color: 'var(--text-secondary)' }}>
           <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>
-            {userNames.yourName} × {userNames.crushName}
+            {userNames.yourName} ï¿½ {userNames.crushName}
           </span>
         </div>
       )}
 
       <div className={`final-card ${isLow ? 'low' : 'high'} ${isSpecialMatch ? 'special-match' : ''}`}>
         <div className="final-percent">{percent}%</div>
-        <div className="final-title">{percent}% Match — {verdict.title}</div>
+        <div className="final-title">{percent}% Match ï¿½ {verdict.title}</div>
         <div className="final-text" style={{ whiteSpace: 'pre-line', lineHeight: '1.6' }}>
           {isSpecialMatch ? result.message : verdict.text}
         </div>

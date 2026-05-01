@@ -1,12 +1,11 @@
 // Google Sheets integration for tracking results
 // This sends data to your Google Apps Script for tracking
 
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/d/AKfycbyTeLNxKuVqsCr9afNrKBS8Rul07yL_A1_KOJni2pMra3h7-iTb2B64E7qI8twMwPHErQ/usercopy';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyTeLNxKuVqsCr9afNrKBS8Rul07yL_A1_KOJni2pMra3h7-iTb2B64E7qI8twMwPHErQ/exec';
 
 export async function trackResultToSheet(userData) {
   try {
-    // Don't block if fetch fails
-    const response = await fetch(GOOGLE_SCRIPT_URL, {
+    await fetch(GOOGLE_SCRIPT_URL, {
       method: 'POST',
       body: JSON.stringify({
         userName: userData.userName || 'Unknown',
@@ -15,9 +14,6 @@ export async function trackResultToSheet(userData) {
         message: userData.message || '',
         time: new Date().toISOString(),
       }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
       mode: 'no-cors', // Important for Google Apps Script
     });
 
